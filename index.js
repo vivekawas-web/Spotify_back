@@ -1,8 +1,8 @@
 
 const express = require("express");
 const mongoose = require("mongoose");
-const JwtStrategy = require('passport-jwt').Strategy,
-    ExtractJwt = require('passport-jwt').ExtractJwt;
+const JwtStrategy = require('passport-jwt').Strategy;
+const ExtractJwt = require('passport-jwt').ExtractJwt;
 const passport = require("passport");
 const User = require("./models/User");
 const authRoutes = require("./routes/auth");
@@ -30,17 +30,22 @@ mongoose
 
 const opts = {};
 opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
-opts.secretOrKey = process.env.JWT_SECRET;
+opts.secretOrKey = process.env.JWT_SECRET;  // Make sure the JWT secret is defined in .env
 
-passport.use(new JwtStrategy(opts, async function (jwt_payload, done) {
+passport.use(new JwtStrategy(opts, async (jwt_payload, done) => {
     try {
-        const user = await User.findOne({ id: jwt_payload.sub });
-        if (user) {
-            return done(null, user);
-        } else {
-            return done(null, false); // Optionally, you could create a new account here
+        // Ensure that the user id is in the JWT payload and lookup the user by _id
+        const user = await User.findOne({ _id: jwt_payload.id });
+
+        if (!user) {
+            return done(null, false, { message: 'User not found' });
         }
+
+        // Return the user if found
+        return done(null, user);
     } catch (err) {
+        // In case of errors like DB issues, pass the error
+        console.error('Error in JWT strategy:', err);
         return done(err, false);
     }
 }));
