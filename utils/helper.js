@@ -6,7 +6,7 @@ module.exports.getToken = async (email, user) => {
     const token = jwt.sign(
         { id: user._id }, // Standard to use 'id' in the payload
         process.env.JWT_SECRET, // Secret key
-        { expiresIn: '1h' } // Expiration time (optional, 1 hour in this case)
+         // Expiration time (optional, 1 hour in this case)
     );
     return token;
 };

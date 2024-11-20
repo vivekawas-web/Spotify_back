@@ -6,22 +6,34 @@ const mongoose=require("mongoose");
 const Songs=new mongoose.Schema({
     name:{
         type : String,
-        require : true
+        required: true,
     },
     thumbnail: {
         type: String,
-        require: true,
+        required: true,
     },
     track: {
         type: String,
-        require:true,
+        required:true,
     },
     artist:{
         type: mongoose.Types.ObjectId,
-        ref: "user"
+        ref: "User"
     }
 });
+
+Songs.index({ name: "text" });
+
 const SongsModel=mongoose.model("Song",Songs);
+
+
+SongsModel.collection.createIndex({ name: "text" })
+    .then(() => {
+        console.log("Text index created on 'name' field");
+    })
+    .catch((err) => {
+        console.error("Error creating text index:", err);
+    });
 
 
 module.exports = SongsModel;
